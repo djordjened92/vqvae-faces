@@ -1,0 +1,17 @@
+{
+    "IMAGE_HEIGHT": 124,
+    "IMAGE_WIDTH": 108,
+    "BATCH_SIZE": 16,
+    "NUM_WORKERS": 0,
+    "CKPT_PERIOD": 20,
+    "LOGS_PATH": "./logs/vqvae",
+    "CODE_DIM": 256,
+    "CODE_SIZE": 128,
+    "MODEL_NAME": "model_3",
+    "CKPT_PATH": "./checkpoints/vqvae/",
+
+    "__comment": "Training hyperparameters",
+    "LR": 1e-4,
+    "EPOCHS": 500,
+    "GRAD_CLIP":1
+}
