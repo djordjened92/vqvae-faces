@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 import torch.nn.functional as F
 from torch import nn, optim
 from collections import OrderedDict
@@ -65,8 +66,8 @@ def train_epochs(model, train_loader, val_loader, train_args, tb_writer, quiet=F
         val_loss = eval_loss(model, val_loader, quiet)
         
         # Save checkpoints
-        if epoch % CKPT_PERIOD == 0:
-            ckpt_path = f'{CKPT_VQVAE_PATH}/{MODEL_NAME}_{epoch}.pt'
+        if epoch % train_args['ckpt_period'] == 0:
+            ckpt_path = f'{train_args["ckpt_path"]}/{train_args["model_name"]}_{epoch}.pt'
             torch.save({
                         'epoch': epoch,
                         'model_state_dict': model.state_dict(),

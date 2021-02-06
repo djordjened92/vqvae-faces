@@ -1,12 +1,20 @@
 {
-    "IMAGE_HEIGHT": 124,
-    "IMAGE_WIDTH": 108,
+    "_comment": "Training parameters",
+    "INPUT_HEIGHT": 31,
+    "INPUT_WIDTH": 27,
+    "EPOCHS": 500,
     "BATCH_SIZE": 16,
+    "SHUFFLE": true,
     "NUM_WORKERS": 0,
     "CKPT_PERIOD": 20,
-    "LOGS_PATH": "./logs/vqvae",
-    "CODE_DIM": 256,
+    "LOGS_PATH": "../../logs/pixelcnn/",
+    "CODE_DIM": 128,
     "CODE_SIZE": 128,
-    "MODEL_NAME": "model_3",
-    "CKPT_PATH": "./checkpoints/vqvae/"
+    "NUM_OF_LAYERS": 10,
+    "MODEL_NAME": "model_1",
+    "CKPT_PATH": "../../checkpoints/pixelcnn/",
+
+    "_comment": "Optimizer hyperparameters",
+    "LR": 1e-3,
+    "GRAD_CLIP":1
 }

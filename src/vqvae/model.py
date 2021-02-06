@@ -1,3 +1,23 @@
+import torch
+import torch.nn.functional as F
+from torch import nn
+from collections import OrderedDict
+
+class ResidualBlock(nn.Module):
+    def __init__(self, dim):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.BatchNorm2d(dim),
+            nn.ReLU(),
+            nn.Conv2d(dim, dim, 3, 1, 1),
+            nn.BatchNorm2d(dim),
+            nn.ReLU(),
+            nn.Conv2d(dim, dim, 1)
+        )
+      
+    def forward(self, x):
+        return x + self.net(x)
+
 class Quantize(nn.Module):
 
     def __init__(self, size, code_dim):

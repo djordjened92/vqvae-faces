@@ -1,17 +1,24 @@
 {
+    "_comment": "Dataset paths",
+    "TRAIN_PATH": "../../data/kinship_ver_t1/train-faces/*/MID*/*.jpg",
+    "VALIDATION_PATH": "../../data/kinship_ver_t1/val-faces/*/MID*/*.jpg",
+    "TEST_PATH": "../../data/kinship_ver_t1/test-faces/*.jpg",
+
+    "_comment": "Training parameters",
     "IMAGE_HEIGHT": 124,
     "IMAGE_WIDTH": 108,
+    "EPOCHS": 500,
     "BATCH_SIZE": 16,
+    "SHUFFLE": true,
     "NUM_WORKERS": 0,
     "CKPT_PERIOD": 20,
-    "LOGS_PATH": "./logs/vqvae",
+    "LOGS_PATH": "../../logs/vqvae",
     "CODE_DIM": 256,
     "CODE_SIZE": 128,
-    "MODEL_NAME": "model_3",
-    "CKPT_PATH": "./checkpoints/vqvae/",
+    "MODEL_NAME": "model_4",
+    "CKPT_PATH": "../../checkpoints/vqvae/",
 
-    "__comment": "Training hyperparameters",
-    "LR": 1e-4,
-    "EPOCHS": 500,
+    "_comment": "Optimizer hyperparameters",
+    "LR": 1e-3,
     "GRAD_CLIP":1
 }
