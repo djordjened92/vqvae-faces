@@ -82,7 +82,6 @@ class PixelCNN(nn.Module):
         self.code_size = code_size
 
     def forward(self, x, cond=None):
-        print(self.embedding.weight.shape)
         out = self.embedding(x).permute(0, 3, 1, 2).contiguous()
         for layer in self.net:
             if isinstance(layer, MaskConv2d) or isinstance(layer, PixelCNNResBlock):

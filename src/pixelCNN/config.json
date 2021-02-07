@@ -7,14 +7,16 @@
     "SHUFFLE": true,
     "NUM_WORKERS": 0,
     "CKPT_PERIOD": 20,
-    "LOGS_PATH": "../../logs/pixelcnn/",
-    "CODE_DIM": 128,
+    "PRETRAINED": "",
+    "LOGS_PATH": "/home/djordje/Documents/vqvae-faces/logs/pixelcnn",
+    "CODE_DIM": 256,
     "CODE_SIZE": 128,
     "NUM_OF_LAYERS": 10,
     "MODEL_NAME": "model_1",
-    "CKPT_PATH": "../../checkpoints/pixelcnn/",
+    "CKPT_PATH": "/home/djordje/Documents/vqvae-faces/checkpoints/pixelcnn",
+    "VQVAE_MODEL": "/home/djordje/Documents/vqvae-faces/checkpoints/vqvae/model_3/model_3_320.pt",
 
     "_comment": "Optimizer hyperparameters",
-    "LR": 1e-3,
+    "LR": 1e-4,
     "GRAD_CLIP":1
 }

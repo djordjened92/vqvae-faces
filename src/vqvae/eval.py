@@ -7,22 +7,22 @@ from skimage import io
 from torchvision.utils import make_grid
 from src.dataset import create_dataloader
 from src.training import train_epochs
-from model import VectorQuantizedVAE
+from src.vqvae.model import VectorQuantizedVAE
+
+torch.manual_seed(123)
 
 def reconstruction(vqvae, data_loader, images_cnt = 2):
     test_iterator = iter(data_loader)
-    inputs = []
-    recons = []
+    out = []
     for i in range(images_cnt):
         x = next(test_iterator).cuda()
         vqvae.eval()
         with torch.no_grad():
             z = vqvae.encode_code(x)
             x_recon = vqvae.decode_code(z)
-        inputs.append(x)
-        recons.append(x_recon)
+        out.append(torch.cat((x, x_recon), axis=0))
 
-    out = torch.cat((torch.cat(inputs, axis=0), torch.cat(recons, axis=0)), axis=0)
+    out = torch.cat(out, axis=0)
     return out
 
 # Get checkpoint of trained model
@@ -49,8 +49,8 @@ image_w = config['IMAGE_WIDTH']
 image_h = config['IMAGE_HEIGHT']
 test_dataloader = create_dataloader(test_path, image_w, image_h, batch_size=1, shuffle=True, workers=0)
 
-recs = reconstruction(vqvae, test_dataloader, 20)
-grid_img = make_grid(recs, nrow=recs.shape[0]//2)
+recs = reconstruction(vqvae, test_dataloader, 100)
+grid_img = make_grid(recs, nrow=20)
 img = grid_img.permute(1, 2, 0).cpu().numpy()
-plt.figure(figsize = (20, 40))
+plt.figure(figsize = (40, 40))
 plt.imsave('reconstructions.png', img)
