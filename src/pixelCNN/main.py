@@ -66,8 +66,8 @@ def main(args):
     n_layers = config['NUM_OF_LAYERS']
     pretrained_path = config['PRETRAINED']
 
-    train_dataloader = create_dataloader(train_path, image_w, image_h, batch_size=1, shuffle=False, workers)
-    val_dataloader = create_dataloader(valid_path, image_w, image_h, batch_size=1, shuffle=False, workers)
+    train_dataloader = create_dataloader(train_path, image_w, image_h, 1, False, workers)
+    val_dataloader = create_dataloader(valid_path, image_w, image_h, 1, False, workers)
     prior_train_data, prior_val_data = create_prior_dataset(train_dataloader, vqvae), create_prior_dataset(val_dataloader, vqvae)
     prior_train_loader = DataLoader(prior_train_data, batch_size=batch_size, shuffle=shuffle)
     prior_val_loader = DataLoader(prior_val_data, batch_size=batch_size)
