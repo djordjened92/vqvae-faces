@@ -3,7 +3,7 @@
     "INPUT_HEIGHT": 31,
     "INPUT_WIDTH": 27,
     "EPOCHS": 500,
-    "BATCH_SIZE": 16,
+    "BATCH_SIZE": 32,
     "SHUFFLE": true,
     "NUM_WORKERS": 0,
     "CKPT_PERIOD": 20,
