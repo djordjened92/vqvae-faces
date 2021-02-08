@@ -1,9 +1,13 @@
 import os
 import torch
 import json
+import numpy as np
+from skimage import io
 from argparse import ArgumentParser
 from src.vqvae.model import VectorQuantizedVAE
 from src.pixelCNN.model import PixelCNN
+
+torch.manual_seed(123)
 
 def main(args):
     vqvae_ckpt_path = args.vqvae_path
@@ -31,13 +35,30 @@ def main(args):
     code_dim = pixelcnn_config['CODE_DIM']
     code_size = pixelcnn_config['CODE_SIZE']
     n_layers = pixelcnn_config['NUM_OF_LAYERS']
+
     pixelCNN = PixelCNN(code_size=code_size, input_shape=(input_h, input_w), dim=code_dim, n_layers=n_layers).cuda()
+    checkpoint = torch.load(pixelcnn_model_path)
+    pixelCNN.load_state_dict(checkpoint['model_state_dict'])
 
     # Sample images
+    vqvae.eval()
+    pixelCNN.eval()
+    samples = pixelCNN.sample(num_samples).long()
+    samples = (vqvae.decode_code(samples).permute(0, 2, 3, 1) * 255).cpu().numpy().astype(np.uint8)
 
+    for i, sample in enumerate(samples):
+        path = os.path.join(samples_dir, f'{i}.jpg')
+        io.imsave(path, sample)
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--arg1', type=int)
+    parser.add_argument('--vqvae_path', type=str, required=True, \
+                        help='Path to vqvae model checkpoint')
+    parser.add_argument('--pixelcnn_path', type=str, required=True, \
+                        help='Path to pixelCNN model checkpoint')
+    parser.add_argument('--num_samples', type=int, required=True, \
+                        help='Number of images to be sampled')
+    parser.add_argument('--samples_dir', type=str, required=True, \
+                        help='Path to directory where samples should be stored')
     args = parser.parse_args()
     main(args)
