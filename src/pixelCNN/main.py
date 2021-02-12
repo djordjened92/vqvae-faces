@@ -88,8 +88,10 @@ def main(args):
         'lr': config['LR'],
         'grad_clip': config['GRAD_CLIP'],
         'ckpt_period': config['CKPT_PERIOD'],
+        'weight_decay': config['WEIGHT_DECAY'],
         'ckpt_path': ckpt_path,
-        'model_name': config['MODEL_NAME']
+        'model_name': config['MODEL_NAME'],
+        'lr_scheduler': config['LR_SCHEDULER']
     }
     train_epochs(pixelCNN, prior_train_loader, prior_val_loader, train_args, writer, quiet=False)
     writer.close()

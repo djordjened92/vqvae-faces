@@ -57,8 +57,17 @@ def eval_loss(model, data_loader, quiet):
 
 def train_epochs(model, train_loader, val_loader, train_args, tb_writer, quiet=False):
     epochs, lr = train_args['epochs'], train_args['lr']
+    weight_decay = train_args.get('weight_decay', 0)
     grad_clip = train_args.get('grad_clip', None)
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+
+    lr_scheduler = train_args.get('lr_scheduler', None)
+    if lr_scheduler == 'cyclic':
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/10, max_lr=lr)
+    elif lr_scheduler == 'lambda_lr':
+        scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 0.95 * epoch)
+    elif lr_scheduler == 'step_lr':
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.7)
     
     for epoch in range(epochs):
         model.train()
@@ -77,3 +86,7 @@ def train_epochs(model, train_loader, val_loader, train_args, tb_writer, quiet=F
         for k in train_loss.keys():
             tb_writer.add_scalar(f'training/{k}', np.mean(train_loss[k]), epoch)
             tb_writer.add_scalar(f'validation/{k}', val_loss[k], epoch)
+        
+        # Apply lr_scheduler
+        if scheduler:
+            scheduler.step()

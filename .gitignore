@@ -5,7 +5,7 @@ __pycache__/
 *.txt
 *.csv
 *.xlsx
-*data/
-*logs/
-*checkpoints/
-!readme_data/
+data/
+logs/
+checkpoints/
+!readme_data/*
