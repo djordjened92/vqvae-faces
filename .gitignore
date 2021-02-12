@@ -8,3 +8,4 @@ __pycache__/
 *data/
 *logs/
 *checkpoints/
+!readme_data/
