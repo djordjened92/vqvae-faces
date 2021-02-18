@@ -51,7 +51,8 @@ def main(args):
     grid_img = make_grid(recs, nrow=20)
     img = grid_img.permute(1, 2, 0).cpu().numpy()
     plt.figure(figsize = (40, 40))
-    plt.imsave('reconstructions.png', img)
+    img_name = os.path.basename(ckpt_path).split('.')[0]
+    plt.imsave(f'recon_{img_name}.png', img)
 
 if __name__ == '__main__':
     parser = ArgumentParser()

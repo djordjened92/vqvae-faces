@@ -47,7 +47,7 @@ class PixelCNNResBlock(nn.Module):
             MaskConv2d('B', dim, dim // 2, 1, conditional_size=conditional_size),
             LayerNorm(dim // 2),
             nn.ReLU(),
-            MaskConv2d('B', dim // 2, dim // 2, 3, padding=1, 
+            MaskConv2d('B', dim // 2, dim // 2, 7, padding=3,
                        conditional_size=conditional_size),
             LayerNorm(dim // 2),
             nn.ReLU(),
@@ -65,24 +65,26 @@ class PixelCNNResBlock(nn.Module):
 
 
 class PixelCNN(nn.Module):
-    def __init__(self, input_shape, code_size, dim=256, n_layers=7,
+    def __init__(self, input_shape, code_size, dim, n_layers=7,
                  conditional_size=None):
         super().__init__()
-        self.embedding = nn.Embedding(code_size, dim)
-        model = nn.ModuleList([MaskConv2d('A', dim, dim, 7, padding=3,
+        self.dim = dim
+        # self.embedding = nn.Embedding(code_size, dim)
+        model = nn.ModuleList([MaskConv2d('A', 1, dim, 7, padding=3,
                                           conditional_size=conditional_size),
                                LayerNorm(dim), nn.ReLU()])
         for _ in range(n_layers - 1):
             model.append(PixelCNNResBlock(dim, conditional_size=conditional_size))
-        model.extend([LayerNorm(dim), nn.ReLU(), MaskConv2d('B', dim, 512, 1, conditional_size=conditional_size),
-                      nn.ReLU(), MaskConv2d('B', 512, code_size, 1,
-                                            conditional_size=conditional_size)])
+        model.extend([LayerNorm(dim), nn.ReLU(), MaskConv2d('B', dim, dim, 1, conditional_size=conditional_size)])
+                    #   nn.ReLU(), MaskConv2d('B', dim, code_size, 1,
+                    #                         conditional_size=conditional_size)])
         self.net = model
         self.input_shape = input_shape
         self.code_size = code_size
 
     def forward(self, x, cond=None):
-        out = self.embedding(x).permute(0, 3, 1, 2).contiguous()
+        x = torch.unsqueeze(x, 1) #self.embedding(x).permute(0, 3, 1, 2).contiguous()
+        out = (x.float() / (self.dim - 1) - 0.5) / 0.5
         for layer in self.net:
             if isinstance(layer, MaskConv2d) or isinstance(layer, PixelCNNResBlock):
                 out = layer(out, cond=cond)

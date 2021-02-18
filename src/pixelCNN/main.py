@@ -2,6 +2,7 @@ import os
 import json
 import shutil
 import torch
+import numpy as np
 from pathlib import Path
 from argparse import ArgumentParser
 from torch.utils.data import DataLoader
@@ -68,7 +69,9 @@ def main(args):
 
     train_dataloader = create_dataloader(train_path, image_w, image_h, 1, False, workers)
     val_dataloader = create_dataloader(valid_path, image_w, image_h, 1, False, workers)
-    prior_train_data, prior_val_data = create_prior_dataset(train_dataloader, vqvae), create_prior_dataset(val_dataloader, vqvae)
+    prior_train_data = np.load(args.train_set_path) if args.train_set_path else create_prior_dataset(train_dataloader, vqvae)
+    prior_val_data = np.load(args.valid_set_path) if args.valid_set_path else create_prior_dataset(val_dataloader, vqvae)
+    
     prior_train_loader = DataLoader(prior_train_data, batch_size=batch_size, shuffle=shuffle)
     prior_val_loader = DataLoader(prior_val_data, batch_size=batch_size)
 
@@ -91,14 +94,19 @@ def main(args):
         'weight_decay': config['WEIGHT_DECAY'],
         'ckpt_path': ckpt_path,
         'model_name': config['MODEL_NAME'],
-        'lr_scheduler': config['LR_SCHEDULER']
+        'lr_scheduler': config['LR_SCHEDULER'],
+        'optimizer': config['OPTIMIZER']
     }
     train_epochs(pixelCNN, prior_train_loader, prior_val_loader, train_args, writer, quiet=False)
     writer.close()
-
+    
 if __name__ == '__main__':
     parser = ArgumentParser()
     parser.add_argument('--config_path', type=str, required=True, \
                         help='Path to configuration file for current PixelCNN training')
+    parser.add_argument('--train_set_path', type=str, \
+                        help='Path to training numpy structure')
+    parser.add_argument('--valid_set_path', type=str, \
+                        help='Path to validation numpy structure')
     args = parser.parse_args()
     main(args)

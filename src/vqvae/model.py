@@ -49,13 +49,13 @@ class VectorQuantizedVAE(nn.Module):
         self.code_dim = code_dim
 
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, self.code_dim // 4, 4, stride=2, padding=1),
+            nn.Conv2d(3, max(self.code_dim // 4, 1), 4, stride=2, padding=1),
             nn.ReLU(),
-            nn.BatchNorm2d(self.code_dim // 4),
-            nn.Conv2d(self.code_dim // 4, self.code_dim // 2, 3, stride=1, padding=1),
+            nn.BatchNorm2d(max(self.code_dim // 4, 1)),
+            nn.Conv2d(max(self.code_dim // 4, 1), max(self.code_dim // 2, 1), 3, stride=1, padding=1),
             nn.ReLU(),
-            nn.BatchNorm2d(self.code_dim // 2),
-            nn.Conv2d(self.code_dim // 2, self.code_dim, 3, stride=1, padding=1),
+            nn.BatchNorm2d(max(self.code_dim // 2, 1)),
+            nn.Conv2d(max(self.code_dim // 2, 1), self.code_dim, 3, stride=1, padding=1),
             nn.ReLU(),
             nn.BatchNorm2d(self.code_dim),
             nn.Conv2d(self.code_dim, self.code_dim, 4, stride=2, padding=1),
@@ -73,13 +73,13 @@ class VectorQuantizedVAE(nn.Module):
             nn.ConvTranspose2d(self.code_dim, self.code_dim, 4, stride=2, padding=1),
             nn.ReLU(),
             nn.BatchNorm2d(self.code_dim),
-            nn.ConvTranspose2d(self.code_dim, self.code_dim // 2, 3, stride=1, padding=1),
+            nn.ConvTranspose2d(self.code_dim, max(self.code_dim // 2, 1), 3, stride=1, padding=1),
             nn.ReLU(),
-            nn.BatchNorm2d(self.code_dim // 2),
-            nn.ConvTranspose2d(self.code_dim // 2, self.code_dim // 4, 3, stride=1, padding=1),
+            nn.BatchNorm2d(max(self.code_dim // 2, 1)),
+            nn.ConvTranspose2d(max(self.code_dim // 2, 1), max(self.code_dim // 4, 1), 3, stride=1, padding=1),
             nn.ReLU(),
-            nn.BatchNorm2d(self.code_dim // 4),
-            nn.ConvTranspose2d(self.code_dim // 4, 3, 4, stride=2, padding=1),
+            nn.BatchNorm2d(max(self.code_dim // 4, 1)),
+            nn.ConvTranspose2d(max(self.code_dim // 4, 1), 3, 4, stride=2, padding=1),
             nn.Tanh(),
         )
 

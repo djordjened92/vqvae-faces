@@ -5,6 +5,14 @@ from torch import nn, optim
 from collections import OrderedDict
 from tqdm import tqdm
 
+optimizers = {
+    'adam': optim.Adam,
+    'sgd': optim.SGD,
+    'sparse_adam': optim.SparseAdam,
+    'adamw': optim.AdamW,
+    'adagrad': optim.Adagrad
+}
+
 def train(model, train_loader, optimizer, epoch, quiet, grad_clip=None):
     model.train()
 
@@ -59,15 +67,16 @@ def train_epochs(model, train_loader, val_loader, train_args, tb_writer, quiet=F
     epochs, lr = train_args['epochs'], train_args['lr']
     weight_decay = train_args.get('weight_decay', 0)
     grad_clip = train_args.get('grad_clip', None)
-    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    optim_param = train_args.get('optimizer', 'adam')
+    optimizer = optimizers[optim_param](model.parameters(), lr=lr, weight_decay=weight_decay)
 
     lr_scheduler = train_args.get('lr_scheduler', None)
     if lr_scheduler == 'cyclic':
-        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/10, max_lr=lr)
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/10, max_lr=lr, cycle_momentum=False)
     elif lr_scheduler == 'lambda_lr':
         scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 0.95 * epoch)
     elif lr_scheduler == 'step_lr':
-        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.7)
+        scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
     
     for epoch in range(epochs):
         model.train()
@@ -88,5 +97,5 @@ def train_epochs(model, train_loader, val_loader, train_args, tb_writer, quiet=F
             tb_writer.add_scalar(f'validation/{k}', val_loss[k], epoch)
         
         # Apply lr_scheduler
-        if scheduler:
+        if lr_scheduler:
             scheduler.step()
