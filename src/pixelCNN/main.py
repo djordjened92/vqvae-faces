@@ -63,7 +63,6 @@ def main(args):
     shuffle = config['SHUFFLE']
     workers = config['NUM_WORKERS']
     code_dim = config['CODE_DIM']
-    code_size = config['CODE_SIZE']
     n_layers = config['NUM_OF_LAYERS']
     pretrained_path = config['PRETRAINED']
 
@@ -76,7 +75,7 @@ def main(args):
     prior_val_loader = DataLoader(prior_val_data, batch_size=batch_size)
 
     # Instantiate model
-    pixelCNN = PixelCNN(code_size=code_size, input_shape=(input_h, input_w), dim=code_dim, n_layers=n_layers).cuda()
+    pixelCNN = PixelCNN(input_shape=(input_h, input_w), dim=code_dim, n_layers=n_layers).cuda()
     
     if pretrained_path:
         checkpoint = torch.load(pretrained_path)

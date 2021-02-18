@@ -7,8 +7,6 @@ from argparse import ArgumentParser
 from src.vqvae.model import VectorQuantizedVAE
 from src.pixelCNN.model import PixelCNN
 
-torch.manual_seed(123)
-
 def main(args):
     vqvae_ckpt_path = args.vqvae_path
     pixelcnn_model_path = args.pixelcnn_path
@@ -33,10 +31,9 @@ def main(args):
     input_w = pixelcnn_config['INPUT_WIDTH']
     input_h = pixelcnn_config['INPUT_HEIGHT']
     code_dim = pixelcnn_config['CODE_DIM']
-    code_size = pixelcnn_config['CODE_SIZE']
     n_layers = pixelcnn_config['NUM_OF_LAYERS']
 
-    pixelCNN = PixelCNN(code_size=code_size, input_shape=(input_h, input_w), dim=code_dim, n_layers=n_layers).cuda()
+    pixelCNN = PixelCNN(input_shape=(input_h, input_w), dim=code_dim, n_layers=n_layers).cuda()
     checkpoint = torch.load(pixelcnn_model_path)
     pixelCNN.load_state_dict(checkpoint['model_state_dict'])
 
