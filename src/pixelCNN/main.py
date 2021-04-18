@@ -49,6 +49,9 @@ def main(args):
     #########################################################
     # Train PixelCNN model
     # Create checkpoint directory
+    if config['GATED']:
+        config["MODEL_NAME"] = 'gated_' +  config["MODEL_NAME"]
+
     ckpt_path = os.path.join(config["CKPT_PATH"], config["MODEL_NAME"])
     Path(ckpt_path).mkdir(parents=True, exist_ok=True)
     # Copy current configuration to model's directory
@@ -75,7 +78,10 @@ def main(args):
     prior_val_loader = DataLoader(prior_val_data, batch_size=batch_size)
 
     # Instantiate model
-    pixelCNN = PixelCNN(input_shape=(input_h, input_w), dim=code_size, n_layers=n_layers).cuda()
+    if config['GATED']:
+        pixelCNN = GatedPixelCNN(input_shape=(input_h, input_w), size=code_size, n_layers=n_layers).cuda()
+    else:
+        pixelCNN = PixelCNN(input_shape=(input_h, input_w), size=code_size, n_layers=n_layers).cuda()
     
     if pretrained_path:
         checkpoint = torch.load(pretrained_path)

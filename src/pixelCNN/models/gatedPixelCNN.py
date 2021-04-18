@@ -2,7 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from collections import OrderedDict
-from ..pixelCNN.model import LayerNorm, MaskConv2d
+from .pixelCNN import LayerNorm, MaskConv2d
 
 class StackLayerNorm(nn.Module):
   def __init__(self, n_filters):
