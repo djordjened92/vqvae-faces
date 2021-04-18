@@ -14,15 +14,15 @@
     "CKPT_PERIOD": 2,
     "PRETRAINED": "",
     "LOGS_PATH": "/home/djordje/Documents/Projects/vqvae-faces/logs/vqvae",
-    "CODE_DIM": 18,
+    "CODE_DIM": 16,
     "CODE_SIZE": 256,
-    "MODEL_NAME": "model_3",
+    "MODEL_NAME": "model_5",
     "CKPT_PATH": "/home/djordje/Documents/Projects/vqvae-faces/checkpoints/vqvae/",
 
     "_comment": "Optimizer hyperparameters",
     "OPTIMIZER": "adam",
-    "LR_SCHEDULER": "step_lr",
-    "LR": 1e-3,
+    "LR_SCHEDULER": "cyclic",
+    "LR": 5e-3,
     "GRAD_CLIP": 1.0,
     "WEIGHT_DECAY": 1e-4
 }
