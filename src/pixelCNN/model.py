@@ -34,18 +34,18 @@ class MaskConv2d(nn.Conv2d):
             self.mask[:, :, k // 2, k // 2] = 1
 
 class PixelCNNResBlock(nn.Module):
-    def __init__(self, dim):
+    def __init__(self, size):
         super().__init__()
         self.block = nn.ModuleList([
-            LayerNorm(dim),
+            LayerNorm(size),
             nn.ReLU(),
-            MaskConv2d('B', dim, dim // 2, 1),
-            LayerNorm(dim // 2),
+            MaskConv2d('B', size, size // 2, 1),
+            LayerNorm(size // 2),
             nn.ReLU(),
-            MaskConv2d('B', dim // 2, dim // 2, 5, padding=2),
-            LayerNorm(dim // 2),
+            MaskConv2d('B', size // 2, size // 2, 5, padding=2),
+            LayerNorm(size // 2),
             nn.ReLU(),
-            MaskConv2d('B', dim // 2, dim, 1)
+            MaskConv2d('B', size // 2, size, 1)
         ])
 
     def forward(self, x):
@@ -56,22 +56,22 @@ class PixelCNNResBlock(nn.Module):
 
 
 class PixelCNN(nn.Module):
-    def __init__(self, input_shape, dim, n_layers=7):
+    def __init__(self, input_shape, size, n_layers=7):
         super().__init__()
-        self.dim = dim
+        self.size = size
 
-        model = nn.ModuleList([MaskConv2d('A', 1, dim, 7, padding=3),
-                               LayerNorm(dim), nn.ReLU()])
+        model = nn.ModuleList([MaskConv2d('A', 1, size, 7, padding=3),
+                               LayerNorm(size), nn.ReLU()])
         for _ in range(n_layers - 1):
-            model.append(PixelCNNResBlock(dim))
-        model.extend([LayerNorm(dim), nn.ReLU(), MaskConv2d('B', dim, dim, 1)])
-                    #   nn.ReLU(), MaskConv2d('B', dim, code_size, 1)])
+            model.append(PixelCNNResBlock(size))
+        model.extend([LayerNorm(size), nn.ReLU(), MaskConv2d('B', size, size, 1)])
+                    #   nn.ReLU(), MaskConv2d('B', size, code_size, 1)])
         self.net = model
         self.input_shape = input_shape
 
     def forward(self, x):
         x = torch.unsqueeze(x, 1) #self.embedding(x).permute(0, 3, 1, 2).contiguous()
-        out = (x.float() / (self.dim - 1) - 0.5) / 0.5
+        out = (x.float() / (self.size - 1) - 0.5) / 0.5
         for layer in self.net:
             out = layer(out)
         return out

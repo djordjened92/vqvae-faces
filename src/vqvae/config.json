@@ -1,8 +1,8 @@
 {
     "_comment": "Dataset paths",
-    "TRAIN_PATH": "/home/djordje/Documents/vqvae-faces/data/kinship_ver_t1/train-faces/*/MID*/*.jpg",
-    "VALIDATION_PATH": "/home/djordje/Documents/vqvae-faces/data/kinship_ver_t1/val-faces/*/MID*/*.jpg",
-    "TEST_PATH": "/home/djordje/Documents/vqvae-faces/data/kinship_ver_t1/test-faces/*.jpg",
+    "TRAIN_PATH": "/home/djordje/Documents/Projects/vqvae-faces/data/kinship_ver_t1/train-faces/*/MID*/*.jpg",
+    "VALIDATION_PATH": "/home/djordje/Documents/Projects/vqvae-faces/data/kinship_ver_t1/val-faces/*/MID*/*.jpg",
+    "TEST_PATH": "/home/djordje/Documents/Projects/vqvae-faces/data/kinship_ver_t1/test-faces/*.jpg",
 
     "_comment": "Training parameters",
     "IMAGE_HEIGHT": 124,
@@ -13,16 +13,16 @@
     "NUM_WORKERS": 4,
     "CKPT_PERIOD": 2,
     "PRETRAINED": "",
-    "LOGS_PATH": "/home/djordje/Documents/vqvae-faces/logs/vqvae",
-    "CODE_DIM": 16,
+    "LOGS_PATH": "/home/djordje/Documents/Projects/vqvae-faces/logs/vqvae",
+    "CODE_DIM": 18,
     "CODE_SIZE": 256,
-    "MODEL_NAME": "model_9",
-    "CKPT_PATH": "/home/djordje/Documents/vqvae-faces/checkpoints/vqvae/",
+    "MODEL_NAME": "model_3",
+    "CKPT_PATH": "/home/djordje/Documents/Projects/vqvae-faces/checkpoints/vqvae/",
 
     "_comment": "Optimizer hyperparameters",
     "OPTIMIZER": "adam",
     "LR_SCHEDULER": "step_lr",
-    "LR": 0.001,
-    "GRAD_CLIP": 1.5,
+    "LR": 1e-3,
+    "GRAD_CLIP": 1.0,
     "WEIGHT_DECAY": 1e-4
 }
