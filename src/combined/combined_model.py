@@ -1,6 +1,9 @@
 import os
 import json
+import torch
+import torch.nn.functional as F
 from torch import nn
+from collections import OrderedDict
 from src.vqvae.model import VectorQuantizedVAE
 from src.pixelCNN.model import PixelCNN, GatedPixelCNN
 
@@ -20,9 +23,11 @@ class VQVAE_PixelCNN(nn.Module):
         _, _, e_ind = self.vqvae.codebook(z)
 
         # PixelCNN infernece
+        e_ind = e_ind.unsqueeze(dim=1)
         e_ind_ar = self.pixelCNN(e_ind)
-        e = self.embedding(e_ind_ar).permute(0, 3, 1, 2).contiguous()
-        e_st = (e - z).detach + z
+        e_ind_am = torch.argmax(F.softmax(e_ind_ar, dim=1), dim=1).long()
+        e = self.vqvae.codebook.embedding(e_ind_am).permute(0, 3, 1, 2).contiguous()
+        e_st = (e - z).detach() + z
         x_tilde = self.vqvae.decoder(e_st)
 
         diff1 = torch.mean((z - e.detach()) ** 2)
@@ -33,6 +38,6 @@ class VQVAE_PixelCNN(nn.Module):
         x = 2 * x - 1
         x_tilde, diff, e_ind, e_ind_ar = self(x)
         recon_loss = F.mse_loss(x_tilde, x)
-        ll = F.cross_entropy(e_ind, e_ind_ar)
+        ll = F.cross_entropy(e_ind_ar, e_ind.squeeze())
         loss = recon_loss + diff + ll
         return OrderedDict(loss=loss, recon_loss=recon_loss, reg_loss=diff, log_likelihood=ll)
