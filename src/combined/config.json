@@ -5,7 +5,7 @@
     "TEST_PATH": "/home/djordje/Documents/Projects/vqvae-faces/data/kinship_ver_t1/test-faces/*.jpg",
     
     "_comment": "PixelCNN",
-    "GATED": false,
+    "GATED": true,
     "NUM_OF_LAYERS": 12,
     "LATENT_SHAPE": [31, 27],
 
@@ -19,15 +19,15 @@
     "CKPT_PERIOD": 2,
     "PRETRAINED": "",
     "LOGS_PATH": "/home/djordje/Documents/Projects/vqvae-faces/logs/combined",
-    "CODE_DIM": 18,
+    "CODE_DIM": 24,
     "CODE_SIZE": 256,
-    "MODEL_NAME": "model_1",
+    "MODEL_NAME": "model_3",
     "CKPT_PATH": "/home/djordje/Documents/Projects/vqvae-faces/checkpoints/combined",
 
     "_comment": "Optimizer hyperparameters",
     "OPTIMIZER": "adam",
-    "LR_SCHEDULER": "cyclic",
-    "LR": 2e-3,
+    "LR_SCHEDULER": "",
+    "LR": 2e-4,
     "GRAD_CLIP": 1.0,
     "WEIGHT_DECAY": 1e-4
 }

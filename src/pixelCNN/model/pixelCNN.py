@@ -83,7 +83,7 @@ class PixelCNN(nn.Module):
         with torch.no_grad():
             for r in range(self.input_shape[0]):
                 for c in range(self.input_shape[1]):
-                    logits = self(samples)[:, :, r, c]
+                    logits = self(samples.unsqueeze(dim=1))[:, :, r, c]
                     logits = F.softmax(logits, dim=1)
                     samples[:, r, c] = torch.multinomial(logits, 1).squeeze(-1)
         return samples

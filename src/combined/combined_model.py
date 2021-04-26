@@ -20,7 +20,7 @@ class VQVAE_PixelCNN(nn.Module):
     def forward(self, x):
         # Encoder and Quantizier
         z = self.vqvae.encoder(x)
-        _, _, e_ind = self.vqvae.codebook(z)
+        e_q, _, e_ind = self.vqvae.codebook(z)
 
         # PixelCNN infernece
         e_ind = e_ind.unsqueeze(dim=1)
@@ -30,8 +30,8 @@ class VQVAE_PixelCNN(nn.Module):
         e_st = (e - z).detach() + z
         x_tilde = self.vqvae.decoder(e_st)
 
-        diff1 = torch.mean((z - e.detach()) ** 2)
-        diff2 = torch.mean((e - z.detach()) ** 2)
+        diff1 = torch.mean((z - e_q.detach()) ** 2)
+        diff2 = torch.mean((e_q - z.detach()) ** 2)
         return x_tilde, diff1 + diff2, e_ind, e_ind_ar
     
     def loss(self, x):
