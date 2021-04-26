@@ -3,6 +3,11 @@
     "TRAIN_PATH": "/home/djordje/Documents/Projects/vqvae-faces/data/kinship_ver_t1/train-faces/*/MID*/*.jpg",
     "VALIDATION_PATH": "/home/djordje/Documents/Projects/vqvae-faces/data/kinship_ver_t1/val-faces/*/MID*/*.jpg",
     "TEST_PATH": "/home/djordje/Documents/Projects/vqvae-faces/data/kinship_ver_t1/test-faces/*.jpg",
+    
+    "_comment": "PixelCNN",
+    "GATED": false,
+    "NUM_OF_LAYERS": 12,
+    "LATENT_SHAPE": [31, 27],
 
     "_comment": "Training parameters",
     "IMAGE_HEIGHT": 124,
@@ -13,11 +18,11 @@
     "NUM_WORKERS": 4,
     "CKPT_PERIOD": 2,
     "PRETRAINED": "",
-    "LOGS_PATH": "/home/djordje/Documents/Projects/vqvae-faces/logs/vqvae",
+    "LOGS_PATH": "/home/djordje/Documents/Projects/vqvae-faces/logs/combined",
     "CODE_DIM": 18,
     "CODE_SIZE": 256,
-    "MODEL_NAME": "model_6",
-    "CKPT_PATH": "/home/djordje/Documents/Projects/vqvae-faces/checkpoints/vqvae/",
+    "MODEL_NAME": "model_1",
+    "CKPT_PATH": "/home/djordje/Documents/Projects/vqvae-faces/checkpoints/combined",
 
     "_comment": "Optimizer hyperparameters",
     "OPTIMIZER": "adam",

@@ -6,6 +6,7 @@ from src.pixelCNN.model import PixelCNN, GatedPixelCNN
 
 class VQVAE_PixelCNN(nn.Module):
     def __init__(self, code_dim, code_size, latent_shape, pixelCNN_gated=False, pixelCNN_n_layers=7):
+        super().__init__()
         self.vqvae = VectorQuantizedVAE(code_dim, code_size).cuda()
 
         if pixelCNN_gated:
@@ -16,7 +17,7 @@ class VQVAE_PixelCNN(nn.Module):
     def forward(self, x):
         # Encoder and Quantizier
         z = self.vqvae.encoder(x)
-        _, _, e_ind = self.codebook(z)
+        _, _, e_ind = self.vqvae.codebook(z)
 
         # PixelCNN infernece
         e_ind_ar = self.pixelCNN(e_ind)

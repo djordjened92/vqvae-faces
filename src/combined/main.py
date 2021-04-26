@@ -7,12 +7,15 @@ from argparse import ArgumentParser
 from torch.utils.tensorboard import SummaryWriter
 from src.dataset import create_dataloader
 from src.training import train_epochs
-from model import VectorQuantizedVAE
+from combined_model import VQVAE_PixelCNN
 
 def main(args):
     # Load configuration
     with open(args.config_path, 'r') as f:
         config = json.load(f)
+    
+    if config['GATED']:
+        config["MODEL_NAME"] = 'gated_' +  config["MODEL_NAME"]
 
     # Create checkpoint directory
     ckpt_path = os.path.join(config["CKPT_PATH"], config["MODEL_NAME"])
@@ -30,6 +33,8 @@ def main(args):
     shuffle = config['SHUFFLE']
     workers = config['NUM_WORKERS']
     pretrained_path = config['PRETRAINED']
+    n_layers = config['NUM_OF_LAYERS']
+    latent_shape = config['LATENT_SHAPE']
 
     train_dataloader = create_dataloader(train_path, image_w, image_h, batch_size, shuffle, workers)
     val_dataloader = create_dataloader(valid_path, image_w, image_h, batch_size, shuffle=False, workers=workers)
@@ -37,7 +42,7 @@ def main(args):
     # Instantiate model
     code_dim = config['CODE_DIM']
     code_size = config['CODE_SIZE']
-    vqvae = VectorQuantizedVAE(code_dim, code_size).cuda()
+    vqvae = VQVAE_PixelCNN(code_dim, code_size, (latent_shape[0], latent_shape[1]), config['GATED'], n_layers).cuda()
 
     if pretrained_path:
         checkpoint = torch.load(pretrained_path)

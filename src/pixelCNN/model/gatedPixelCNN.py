@@ -87,7 +87,6 @@ class GatedPixelCNN(nn.Module):
     self.net = nn.Sequential(*model)
 
   def forward(self, x):
-    x = torch.unsqueeze(x, 1)
     out = (x.float() / (self.size - 1) - 0.5) / 0.5
     out = self.in_conv(out)
     out = self.net(torch.cat((out, out), dim=1)).chunk(2, dim=1)[1]

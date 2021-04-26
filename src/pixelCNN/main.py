@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from src.dataset import create_dataloader
 from src.training import train_epochs
-from src.pixelCNN.models import PixelCNN, GatedPixelCNN
+from src.pixelCNN.model import PixelCNN, GatedPixelCNN
 from src.vqvae.model import VectorQuantizedVAE
 
 def main(args):
