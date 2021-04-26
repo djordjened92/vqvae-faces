@@ -39,7 +39,7 @@ class PixelCNNResBlock(nn.Module):
         self.block = nn.ModuleList([
             LayerNorm(size),
             nn.ReLU(),
-            MaskConv2d('B', size, size // 2, 1),
+            MaskConv2d('B', size, size // 2, 3, padding=1),
             LayerNorm(size // 2),
             nn.ReLU(),
             MaskConv2d('B', size // 2, size // 2, 5, padding=2),
@@ -69,7 +69,6 @@ class PixelCNN(nn.Module):
         self.net = model
 
     def forward(self, x):
-        x = torch.unsqueeze(x, 1)
         out = (x.float() / (self.size - 1) - 0.5) / 0.5
         for layer in self.net:
             out = layer(out)
@@ -84,7 +83,7 @@ class PixelCNN(nn.Module):
         with torch.no_grad():
             for r in range(self.input_shape[0]):
                 for c in range(self.input_shape[1]):
-                    logits = self(samples)[:, :, r, c]
+                    logits = self(samples.unsqueeze(dim=1))[:, :, r, c]
                     logits = F.softmax(logits, dim=1)
                     samples[:, r, c] = torch.multinomial(logits, 1).squeeze(-1)
         return samples
