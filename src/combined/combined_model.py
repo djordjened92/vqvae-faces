@@ -20,14 +20,14 @@ class VQVAE_PixelCNN(nn.Module):
     def forward(self, x):
         # Encoder and Quantizier
         z = self.vqvae.encoder(x)
-        e_q, _, e_ind = self.vqvae.codebook(z)
+        e_q, e_st, e_ind = self.vqvae.codebook(z)
 
         # PixelCNN infernece
         e_ind = e_ind.unsqueeze(dim=1)
         e_ind_ar = self.pixelCNN(e_ind)
-        e_ind_am = torch.argmax(F.softmax(e_ind_ar, dim=1), dim=1).long()
-        e = self.vqvae.codebook.embedding(e_ind_am).permute(0, 3, 1, 2).contiguous()
-        e_st = (e - z).detach() + z
+        # e_ind_am = torch.argmax(F.softmax(e_ind_ar, dim=1), dim=1).long()
+        # e = self.vqvae.codebook.embedding(e_ind_am).permute(0, 3, 1, 2).contiguous()
+        # e_st = ((e if epoch > 20 else e_q) - z).detach() + z
         x_tilde = self.vqvae.decoder(e_st)
 
         diff1 = torch.mean((z - e_q.detach()) ** 2)
@@ -39,5 +39,5 @@ class VQVAE_PixelCNN(nn.Module):
         x_tilde, diff, e_ind, e_ind_ar = self(x)
         recon_loss = F.mse_loss(x_tilde, x)
         ll = F.cross_entropy(e_ind_ar, e_ind.squeeze())
-        loss = recon_loss + diff + ll
+        loss = recon_loss + diff + 30*ll#(1e-2 if epoch > 30 else 0) * ll
         return OrderedDict(loss=loss, recon_loss=recon_loss, reg_loss=diff, log_likelihood=ll)

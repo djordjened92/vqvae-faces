@@ -6,14 +6,14 @@
     
     "_comment": "PixelCNN",
     "GATED": true,
-    "NUM_OF_LAYERS": 12,
+    "NUM_OF_LAYERS": 6,
     "LATENT_SHAPE": [31, 27],
 
     "_comment": "Training parameters",
     "IMAGE_HEIGHT": 124,
     "IMAGE_WIDTH": 108,
     "EPOCHS": 500,
-    "BATCH_SIZE": 12,
+    "BATCH_SIZE": 8,
     "SHUFFLE": true,
     "NUM_WORKERS": 4,
     "CKPT_PERIOD": 2,
@@ -21,13 +21,13 @@
     "LOGS_PATH": "/home/djordje/Documents/Projects/vqvae-faces/logs/combined",
     "CODE_DIM": 24,
     "CODE_SIZE": 256,
-    "MODEL_NAME": "model_3",
+    "MODEL_NAME": "model_13",
     "CKPT_PATH": "/home/djordje/Documents/Projects/vqvae-faces/checkpoints/combined",
 
     "_comment": "Optimizer hyperparameters",
     "OPTIMIZER": "adam",
     "LR_SCHEDULER": "",
-    "LR": 2e-4,
+    "LR": 5e-3,
     "GRAD_CLIP": 1.0,
-    "WEIGHT_DECAY": 1e-4
+    "WEIGHT_DECAY": 1e-6
 }

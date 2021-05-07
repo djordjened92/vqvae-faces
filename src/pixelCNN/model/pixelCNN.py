@@ -69,7 +69,7 @@ class PixelCNN(nn.Module):
         self.net = model
 
     def forward(self, x):
-        out = (x.float() / (self.size - 1) - 0.5) / 0.5
+        out = x.float()#(x.float() / (self.size - 1) - 0.5) / 0.5
         for layer in self.net:
             out = layer(out)
         return out

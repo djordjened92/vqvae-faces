@@ -87,7 +87,7 @@ class GatedPixelCNN(nn.Module):
     self.net = nn.Sequential(*model)
 
   def forward(self, x):
-    out = (x.float() / (self.size - 1) - 0.5) / 0.5
+    out = x.float()#(x.float() / (self.size - 1) - 0.5) / 0.5
     out = self.in_conv(out)
     out = self.net(torch.cat((out, out), dim=1)).chunk(2, dim=1)[1]
     out = self.out_conv(out)
@@ -101,7 +101,7 @@ class GatedPixelCNN(nn.Module):
     with torch.no_grad():
       for r in range(self.input_shape[0]):
         for c in range(self.input_shape[1]):
-            logits = self(samples)[:, :, r, c]
+            logits = self(samples.unsqueeze(dim=1))[:, :, r, c]
             probs = F.softmax(logits, dim=1)
             samples[:, r, c] = torch.multinomial(probs, 1).squeeze(-1)
     return samples
