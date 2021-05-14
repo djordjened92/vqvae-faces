@@ -55,6 +55,6 @@ if __name__ == '__main__':
     main(args)
 
 '''
-python combined/sample.py --model_ckpt_path='/home/djordje/Documents/Projects/vqvae-faces/checkpoints/combined/gated_model_12/gated_model_12_26.pt' \
+python combined/sample.py --model_ckpt_path='/home/djordje/Documents/Projects/vqvae-faces/checkpoints/LFW/combined/gated_model_2/gated_model_2_18.pt' \
     --num_samples=2 --samples_dir='/home/djordje/Documents/Projects/vqvae-faces/samples'
 '''

@@ -24,7 +24,7 @@ class VQVAE_PixelCNN(nn.Module):
 
         # PixelCNN infernece
         e_ind = e_ind.unsqueeze(dim=1)
-        e_ind_ar = self.pixelCNN(e_ind)
+        e_ind_ar = self.pixelCNN(e_ind.detach())
         # e_ind_am = torch.argmax(F.softmax(e_ind_ar, dim=1), dim=1).long()
         # e = self.vqvae.codebook.embedding(e_ind_am).permute(0, 3, 1, 2).contiguous()
         # e_st = ((e if epoch > 20 else e_q) - z).detach() + z
@@ -39,5 +39,5 @@ class VQVAE_PixelCNN(nn.Module):
         x_tilde, diff, e_ind, e_ind_ar = self(x)
         recon_loss = F.mse_loss(x_tilde, x)
         ll = F.cross_entropy(e_ind_ar, e_ind.squeeze())
-        loss = recon_loss + diff + 30*ll#(1e-2 if epoch > 30 else 0) * ll
+        loss = recon_loss + diff + 8*ll#(1e-2 if epoch > 30 else 0) * ll
         return OrderedDict(loss=loss, recon_loss=recon_loss, reg_loss=diff, log_likelihood=ll)

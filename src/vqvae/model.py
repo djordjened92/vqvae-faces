@@ -4,12 +4,12 @@ from torch import nn
 from collections import OrderedDict
 
 class ResidualBlock(nn.Module):
-    def __init__(self, dim):
+    def __init__(self, dim, k=3, s=1, p=1):
         super().__init__()
         self.net = nn.Sequential(
             nn.BatchNorm2d(dim),
             nn.ReLU(),
-            nn.Conv2d(dim, dim, 3, 1, 1),
+            nn.Conv2d(dim, dim, k, s, p),
             nn.BatchNorm2d(dim),
             nn.ReLU(),
             nn.Conv2d(dim, dim, 1)
@@ -49,7 +49,10 @@ class VectorQuantizedVAE(nn.Module):
         self.code_dim = code_dim
 
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, max(self.code_dim // 4, 1), 4, stride=2, padding=1),
+            nn.Conv2d(3, max(self.code_dim // 6, 1), 4, stride=2, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(max(self.code_dim // 6, 1)),
+            nn.Conv2d(max(self.code_dim // 6, 1), max(self.code_dim // 4, 1), 3, stride=2, padding=1),
             nn.ReLU(),
             nn.BatchNorm2d(max(self.code_dim // 4, 1)),
             nn.Conv2d(max(self.code_dim // 4, 1), max(self.code_dim // 2, 1), 3, stride=1, padding=1),
@@ -58,9 +61,12 @@ class VectorQuantizedVAE(nn.Module):
             nn.Conv2d(max(self.code_dim // 2, 1), self.code_dim, 3, stride=1, padding=1),
             nn.ReLU(),
             nn.BatchNorm2d(self.code_dim),
-            nn.Conv2d(self.code_dim, self.code_dim, 4, stride=2, padding=1),
+            nn.Conv2d(self.code_dim, self.code_dim, 3, stride=2, padding=1),
+            ResidualBlock(self.code_dim, 7, 1, 3),
+            ResidualBlock(self.code_dim, 5, 1, 2),
+            ResidualBlock(self.code_dim, 5, 1, 2),
             ResidualBlock(self.code_dim),
-            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim)
         )
 
         self.codebook = Quantize(code_size, code_dim)
@@ -68,9 +74,12 @@ class VectorQuantizedVAE(nn.Module):
         self.decoder = nn.Sequential(
             ResidualBlock(self.code_dim),
             ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim, 5, 1, 2),
+            ResidualBlock(self.code_dim, 5, 1, 2),
+            ResidualBlock(self.code_dim, 7, 1, 3),
             nn.ReLU(),
             nn.BatchNorm2d(self.code_dim),
-            nn.ConvTranspose2d(self.code_dim, self.code_dim, 4, stride=2, padding=1),
+            nn.ConvTranspose2d(self.code_dim, self.code_dim, 3, stride=2, padding=1),
             nn.ReLU(),
             nn.BatchNorm2d(self.code_dim),
             nn.ConvTranspose2d(self.code_dim, max(self.code_dim // 2, 1), 3, stride=1, padding=1),
@@ -79,7 +88,10 @@ class VectorQuantizedVAE(nn.Module):
             nn.ConvTranspose2d(max(self.code_dim // 2, 1), max(self.code_dim // 4, 1), 3, stride=1, padding=1),
             nn.ReLU(),
             nn.BatchNorm2d(max(self.code_dim // 4, 1)),
-            nn.ConvTranspose2d(max(self.code_dim // 4, 1), 3, 4, stride=2, padding=1),
+            nn.ConvTranspose2d(max(self.code_dim // 4, 1), max(self.code_dim // 6, 1), 3, stride=2, padding=1),
+            nn.ReLU(),
+            nn.BatchNorm2d(max(self.code_dim // 6, 1)),
+            nn.ConvTranspose2d(max(self.code_dim // 6, 1), 3, 4, stride=2, padding=1),
             nn.Tanh(),
         )
 
@@ -102,7 +114,7 @@ class VectorQuantizedVAE(nn.Module):
 
         diff1 = torch.mean((z - e.detach()) ** 2)
         diff2 = torch.mean((e - z.detach()) ** 2)
-        return x_tilde, diff1 + diff2
+        return x_tilde, 0.25 * diff1 + diff2
 
     def loss(self, x):
         x = 2 * x - 1
