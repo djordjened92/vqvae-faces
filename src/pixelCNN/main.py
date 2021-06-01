@@ -24,6 +24,7 @@ def main(args):
             for x in data_loader:
                 x = x.cuda()
                 z = model.cuda().encode_code(x)
+                z = z.unsqueeze(dim=0)
                 prior_data.append(z.long())
         return torch.cat(prior_data, dim=0)
 

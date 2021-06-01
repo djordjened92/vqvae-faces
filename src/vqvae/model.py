@@ -8,10 +8,10 @@ class ResidualBlock(nn.Module):
         super().__init__()
         self.net = nn.Sequential(
             nn.BatchNorm2d(dim),
-            nn.ReLU(),
+            nn.RReLU(),
             nn.Conv2d(dim, dim, k, s, p),
             nn.BatchNorm2d(dim),
-            nn.ReLU(),
+            nn.RReLU(),
             nn.Conv2d(dim, dim, 1)
         )
       
@@ -63,22 +63,26 @@ class VectorQuantizedVAE(nn.Module):
         self.code_dim = code_dim
 
         self.encoder = nn.Sequential(
-            nn.Conv2d(3, max(self.code_dim // 6, 1), 4, stride=2, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(max(self.code_dim // 6, 1)),
-            nn.Conv2d(max(self.code_dim // 6, 1), max(self.code_dim // 4, 1), 3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(max(self.code_dim // 4, 1)),
-            nn.Conv2d(max(self.code_dim // 4, 1), max(self.code_dim // 2, 1), 3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(max(self.code_dim // 2, 1)),
-            nn.Conv2d(max(self.code_dim // 2, 1), self.code_dim, 3, stride=1, padding=1),
-            nn.ReLU(),
+            nn.Conv2d(3, self.code_dim, 4, stride=2, padding=1),
+            nn.ReLU6(),
             nn.BatchNorm2d(self.code_dim),
             nn.Conv2d(self.code_dim, self.code_dim, 3, stride=2, padding=1),
-            ResidualBlock(self.code_dim, 7, 1, 3),
-            ResidualBlock(self.code_dim, 5, 1, 2),
-            ResidualBlock(self.code_dim, 5, 1, 2),
+            nn.ReLU6(),
+            nn.BatchNorm2d(self.code_dim),
+            nn.Conv2d(self.code_dim, self.code_dim, 3, stride=1, padding=1),
+            nn.ReLU6(),
+            nn.BatchNorm2d(self.code_dim),
+            nn.Conv2d(self.code_dim, self.code_dim, 3, stride=1, padding=1),
+            nn.ReLU6(),
+            nn.BatchNorm2d(self.code_dim),
+            nn.Conv2d(self.code_dim, self.code_dim, 3, stride=2, padding=1),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
             ResidualBlock(self.code_dim),
             ResidualBlock(self.code_dim)
         )
@@ -88,24 +92,28 @@ class VectorQuantizedVAE(nn.Module):
         self.decoder = nn.Sequential(
             ResidualBlock(self.code_dim),
             ResidualBlock(self.code_dim),
-            ResidualBlock(self.code_dim, 5, 1, 2),
-            ResidualBlock(self.code_dim, 5, 1, 2),
-            ResidualBlock(self.code_dim, 7, 1, 3),
-            nn.ReLU(),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            ResidualBlock(self.code_dim),
+            nn.ReLU6(),
             nn.BatchNorm2d(self.code_dim),
             nn.ConvTranspose2d(self.code_dim, self.code_dim, 3, stride=2, padding=1),
-            nn.ReLU(),
+            nn.ReLU6(),
             nn.BatchNorm2d(self.code_dim),
-            nn.ConvTranspose2d(self.code_dim, max(self.code_dim // 2, 1), 3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(max(self.code_dim // 2, 1)),
-            nn.ConvTranspose2d(max(self.code_dim // 2, 1), max(self.code_dim // 4, 1), 3, stride=1, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(max(self.code_dim // 4, 1)),
-            nn.ConvTranspose2d(max(self.code_dim // 4, 1), max(self.code_dim // 6, 1), 3, stride=2, padding=1),
-            nn.ReLU(),
-            nn.BatchNorm2d(max(self.code_dim // 6, 1)),
-            nn.ConvTranspose2d(max(self.code_dim // 6, 1), 3, 4, stride=2, padding=1),
+            nn.ConvTranspose2d(self.code_dim, self.code_dim, 3, stride=1, padding=1),
+            nn.ReLU6(),
+            nn.BatchNorm2d(self.code_dim),
+            nn.ConvTranspose2d(self.code_dim, self.code_dim, 3, stride=1, padding=1),
+            nn.ReLU6(),
+            nn.BatchNorm2d(self.code_dim),
+            nn.ConvTranspose2d(self.code_dim, self.code_dim, 3, stride=2, padding=1),
+            nn.ReLU6(),
+            nn.BatchNorm2d(self.code_dim),
+            nn.ConvTranspose2d(self.code_dim, 3, 4, stride=2, padding=1),
             nn.Tanh(),
         )
 
@@ -118,7 +126,7 @@ class VectorQuantizedVAE(nn.Module):
 
     def decode_code(self, latents):
         with torch.no_grad():
-            latents = self.codebook.embedding(latents).permute(0, 3, 1, 2).contiguous()
+            latents = F.embedding(latents, self.codebook.embeddings).permute(0, 3, 1, 2).contiguous()
             return self.decoder(latents) * 0.5 + 0.5
 
     def forward(self, x):
@@ -126,7 +134,7 @@ class VectorQuantizedVAE(nn.Module):
         e, e_st, _ = self.codebook(z)
         x_tilde = self.decoder(e_st)
 
-        commitment_loss = 0.25 * torch.mean((z - e) ** 2)
+        commitment_loss = 0.15 * torch.mean((z - e) ** 2)
         return x_tilde, commitment_loss
 
     def loss(self, x):

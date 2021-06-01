@@ -78,12 +78,12 @@ class GatedPixelCNN(nn.Module):
     self.input_shape = input_shape
     self.size = size
 
-    self.in_conv = MaskConv2d('A', 1, size, 7, padding=3)
+    self.in_conv = MaskConv2d('A', 1, size // 2, 7, padding=3)
     model = []
     for _ in range(n_layers - 2):
-      model.extend([nn.ReLU(), StackLayerNorm(size), GatedConv2d('B', size, size, 7, padding=3)])
-    model.extend([nn.ReLU(), StackLayerNorm(size)])
-    self.out_conv = MaskConv2d('B', size, size, 7, padding=3)
+      model.extend([nn.ReLU(), nn.Dropout(0.2), StackLayerNorm(size // 2), GatedConv2d('B', size // 2, size // 2, 7, padding=3)])
+    model.extend([nn.ReLU(), StackLayerNorm(size // 2)])
+    self.out_conv = MaskConv2d('B', size // 2, size, 7, padding=3)
     self.net = nn.Sequential(*model)
 
   def forward(self, x):
@@ -94,7 +94,7 @@ class GatedPixelCNN(nn.Module):
     return out
   
   def loss(self, x):
-    return OrderedDict(loss=F.cross_entropy(self(x), x.long()))
+    return OrderedDict(loss=F.cross_entropy(self(x), x.squeeze()))
 
   def sample(self, n):
     samples = torch.zeros(n, *self.input_shape).long().cuda()

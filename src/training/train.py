@@ -10,7 +10,9 @@ optimizers = {
     'sgd': optim.SGD,
     'sparse_adam': optim.SparseAdam,
     'adamw': optim.AdamW,
-    'adagrad': optim.Adagrad
+    'adagrad': optim.Adagrad,
+    'rmsprop': optim.RMSprop,
+    'asgd': optim.ASGD
 }
 
 def train(model, train_loader, optimizer, epoch, quiet, grad_clip=None):
@@ -71,10 +73,22 @@ def train_epochs(model, train_loader, val_loader, train_args, tb_writer, quiet=F
     optimizer = optimizers[optim_param](model.parameters(), lr=lr, weight_decay=weight_decay)
 
     lr_scheduler = train_args.get('lr_scheduler', None)
+    def lambda_lr(epoch):
+        if epoch <= 30:
+            return 1.
+        elif 30 < epoch <= 60:
+            return 0.5
+        elif 60 < epoch <= 120:
+            return 0.25
+        elif 120 < epoch <= 200:
+            return 0.125
+        else:
+            return 0.0125
+
     if lr_scheduler == 'cyclic':
         scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/10, max_lr=lr, cycle_momentum=False)
     elif lr_scheduler == 'lambda_lr':
-        scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: 0.95 * epoch)
+        scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
     elif lr_scheduler == 'step_lr':
         scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
     

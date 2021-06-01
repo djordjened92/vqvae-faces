@@ -9,7 +9,6 @@ class LayerNorm(nn.LayerNorm):
 
     def forward(self, x):
         x = x.permute(0, 2, 3, 1).contiguous()
-        x_shape = x.shape
         x = super().forward(x)
         return x.permute(0, 3, 1, 2).contiguous()
 
@@ -39,13 +38,16 @@ class PixelCNNResBlock(nn.Module):
         self.block = nn.ModuleList([
             LayerNorm(size),
             nn.ReLU(),
-            MaskConv2d('B', size, size // 2, 3, padding=1),
-            LayerNorm(size // 2),
+            nn.Dropout(0.2),
+            MaskConv2d('B', size, size, 3, padding=1),
+            LayerNorm(size),
             nn.ReLU(),
-            MaskConv2d('B', size // 2, size // 2, 5, padding=2),
-            LayerNorm(size // 2),
+            nn.Dropout(0.2),
+            MaskConv2d('B', size, size, 3, padding=1),
+            LayerNorm(size),
             nn.ReLU(),
-            MaskConv2d('B', size // 2, size, 1)
+            nn.Dropout(0.2),
+            MaskConv2d('B', size, size, 1)
         ])
 
     def forward(self, x):
@@ -61,8 +63,7 @@ class PixelCNN(nn.Module):
         self.size = size
         self.input_shape = input_shape
 
-        model = nn.ModuleList([MaskConv2d('A', 1, size, 7, padding=3),
-                               LayerNorm(size), nn.ReLU()])
+        model = nn.ModuleList([MaskConv2d('A', 1, size, 5, padding=2)])
         for _ in range(n_layers - 1):
             model.append(PixelCNNResBlock(size))
         model.extend([LayerNorm(size), nn.ReLU(), MaskConv2d('B', size, size, 1)])
@@ -75,8 +76,7 @@ class PixelCNN(nn.Module):
         return out
 
     def loss(self, x):
-        out = self(x)
-        return OrderedDict(loss=F.cross_entropy(out, x))
+        return OrderedDict(loss=F.cross_entropy(self(x), x.squeeze()))
 
     def sample(self, n):
         samples = torch.zeros(n, *self.input_shape).long().cuda()
