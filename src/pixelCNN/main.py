@@ -72,9 +72,17 @@ def main(args):
 
     train_dataloader = create_dataloader(train_path, image_w, image_h, 1, False, workers)
     val_dataloader = create_dataloader(valid_path, image_w, image_h, 1, False, workers)
-    prior_train_data = np.load(args.train_set_path) if args.train_set_path else create_prior_dataset(train_dataloader, vqvae)
-    prior_val_data = np.load(args.valid_set_path) if args.valid_set_path else create_prior_dataset(val_dataloader, vqvae)
     
+    # Load prior dataset either from numpy files, or generating it from images
+    if args.save_prior_ds == 'True':
+        prior_train_data = create_prior_dataset(train_dataloader, vqvae)
+        prior_val_data = create_prior_dataset(val_dataloader, vqvae)
+        np.save(args.train_set_path, prior_train_data.cpu())
+        np.save(args.valid_set_path, prior_val_data.cpu())
+    else:
+        prior_train_data = np.load(args.train_set_path) if args.train_set_path else create_prior_dataset(train_dataloader, vqvae)
+        prior_val_data = np.load(args.valid_set_path) if args.valid_set_path else create_prior_dataset(val_dataloader, vqvae)
+
     prior_train_loader = DataLoader(prior_train_data, batch_size=batch_size, shuffle=shuffle)
     prior_val_loader = DataLoader(prior_val_data, batch_size=batch_size)
 
@@ -114,5 +122,7 @@ if __name__ == '__main__':
                         help='Path to training numpy structure')
     parser.add_argument('--valid_set_path', type=str, \
                         help='Path to validation numpy structure')
+    parser.add_argument('--save_prior_ds', type=str, \
+                        help='Flag for saving generated prior dataset')
     args = parser.parse_args()
     main(args)
