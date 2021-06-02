@@ -78,12 +78,12 @@ class GatedPixelCNN(nn.Module):
     self.input_shape = input_shape
     self.size = size
 
-    self.in_conv = MaskConv2d('A', 1, size // 2, 7, padding=3)
+    self.in_conv = MaskConv2d('A', 1, size // 2, 5, padding=2)
     model = []
     for _ in range(n_layers - 2):
-      model.extend([nn.ReLU(), nn.Dropout(0.2), StackLayerNorm(size // 2), GatedConv2d('B', size // 2, size // 2, 7, padding=3)])
+      model.extend([nn.ReLU(), nn.Dropout(0.3), StackLayerNorm(size // 2), GatedConv2d('B', size // 2, size // 2, 3, padding=1)])
     model.extend([nn.ReLU(), StackLayerNorm(size // 2)])
-    self.out_conv = MaskConv2d('B', size // 2, size, 7, padding=3)
+    self.out_conv = MaskConv2d('B', size // 2, size, 5, padding=2)
     self.net = nn.Sequential(*model)
 
   def forward(self, x):

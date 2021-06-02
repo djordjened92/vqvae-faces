@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from src.dataset import create_dataloader
 from src.training import train_epochs
-from src.pixelCNN.model import PixelCNN, GatedPixelCNN
+from src.pixelCNN.model import PixelCNN, GatedPixelCNN, PixelSNAIL
 from src.vqvae.model import VectorQuantizedVAE
 
 def main(args):
@@ -50,8 +50,7 @@ def main(args):
     #########################################################
     # Train PixelCNN model
     # Create checkpoint directory
-    if config['GATED']:
-        config["MODEL_NAME"] = 'gated_' +  config["MODEL_NAME"]
+    config["MODEL_NAME"] = config['TYPE'] + '_' + config["MODEL_NAME"]
 
     ckpt_path = os.path.join(config["CKPT_PATH"], config["MODEL_NAME"])
     Path(ckpt_path).mkdir(parents=True, exist_ok=True)
@@ -87,10 +86,16 @@ def main(args):
     prior_val_loader = DataLoader(prior_val_data, batch_size=batch_size)
 
     # Instantiate model
-    if config['GATED']:
-        pixelCNN = GatedPixelCNN(input_shape=(input_h, input_w), size=code_size, n_layers=n_layers).cuda()
-    else:
-        pixelCNN = PixelCNN(input_shape=(input_h, input_w), size=code_size, n_layers=n_layers).cuda()
+    pixelCNN_types = {
+        'pixelCNN': PixelCNN,
+        'gatedPixelCNN': GatedPixelCNN,
+        'pixelSNAIL': PixelSNAIL
+    }
+    pixelCNN = pixelCNN_types[config['TYPE']](
+        input_shape=(input_h, input_w),
+        size=code_size,
+        n_layers=n_layers
+    ).cuda()
     
     if pretrained_path:
         checkpoint = torch.load(pretrained_path)
