@@ -88,14 +88,29 @@ def main(args):
     # Instantiate model
     pixelCNN_types = {
         'pixelCNN': PixelCNN,
-        'gatedPixelCNN': GatedPixelCNN,
-        'pixelSNAIL': PixelSNAIL
+        'gatedPixelCNN': GatedPixelCNN
     }
-    pixelCNN = pixelCNN_types[config['TYPE']](
-        input_shape=(input_h, input_w),
-        size=code_size,
-        n_layers=n_layers
-    ).cuda()
+
+    pixelCNN_type = config['TYPE']
+    if pixelCNN_type in ['pixelCNN', 'gatedPixelCNN']:
+        pixelCNN = pixelCNN_types[pixelCNN_type](
+            input_shape=(input_h, input_w),
+            size=code_size,
+            n_layers=n_layers
+        ).cuda()
+    elif pixelCNN_type == 'pixelSNAIL':
+        pixelCNN = PixelSNAIL(
+            in_channels=1,
+            out_channels=code_size,
+            n_channels=code_size,
+            n_pixel_snail_blocks=n_layers,
+            n_residual_blocks=2,
+            attention_value_channels=code_size // 2,  # n_channels / 2
+            attention_key_channels=16
+        )
+    else:
+        print(f'Incorrect pixelCNN model type')
+        exit(1)
     
     if pretrained_path:
         checkpoint = torch.load(pretrained_path)

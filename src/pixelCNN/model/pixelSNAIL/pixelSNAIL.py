@@ -1,4 +1,5 @@
 import torch
+from collections import OrderedDict
 from torch import nn
 from torch.nn import functional as F
 from .causal_attention import CausalAttention
@@ -34,7 +35,7 @@ class CausalConv2d(nn.Conv2d):
 
     def forward(self, x):
         self.weight.data *= self.mask
-        return super().forward(x)
+        return super().forward(x.float())
 
 class GatedActivation(nn.Module):
     """Gated activation function as introduced in [2].
@@ -214,6 +215,9 @@ class PixelSNAIL(AutoregressiveModel):
         for block in self._pixel_snail_blocks:
             x = x + block(x, input_img)
         return self._output(x)
+    
+    def loss(self, x):
+        return OrderedDict(loss=F.cross_entropy(self(x), x.squeeze()))
 
 
 def reproduce(
