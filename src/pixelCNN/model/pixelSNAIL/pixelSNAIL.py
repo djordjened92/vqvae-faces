@@ -2,7 +2,7 @@ import torch
 from collections import OrderedDict
 from torch import nn
 from torch.nn import functional as F
-from .causal_attention import CausalAttention
+from .causal_attention import CausalAttention, image_positional_encoding
 from .base import AutoregressiveModel
 
 def _elu_conv_elu(conv, x):
@@ -77,7 +77,7 @@ class ResidualBlock(nn.Module):
             kernel_size=2,
             padding=1,
         )
-        self._activation = GatedActivation(activation_fn=nn.Identity())
+        self._activation = GatedActivation()
 
     def forward(self, x):
         _, c, h, w = x.shape
@@ -210,6 +210,7 @@ class PixelSNAIL(AutoregressiveModel):
         )
 
     def forward(self, x):
+        # x = x.float()
         input_img = x
         x = self._input(x)
         for block in self._pixel_snail_blocks:
@@ -217,75 +218,11 @@ class PixelSNAIL(AutoregressiveModel):
         return self._output(x)
     
     def loss(self, x):
-        return OrderedDict(loss=F.cross_entropy(self(x), x.squeeze()))
+        return OrderedDict(loss=F.cross_entropy(self(x), x.squeeze(1)))
 
-
-def reproduce(
-    n_epochs=457,
-    batch_size=128,
-    log_dir="/tmp/run",
-    n_gpus=1,
-    device_id=0,
-    debug_loader=None,
-):
-    """Training script with defaults to reproduce results.
-
-    The code inside this function is self contained and can be used as a top level
-    training script, e.g. by copy/pasting it into a Jupyter notebook.
-
-    Args:
-        n_epochs: Number of epochs to train for.
-        batch_size: Batch size to use for training and evaluation.
-        log_dir: Directory where to log trainer state and TensorBoard summaries.
-        n_gpus: Number of GPUs to use for training the model. If 0, uses CPU.
-        device_id: The device_id of the current GPU when training on multiple GPUs.
-        debug_loader: Debug DataLoader which replaces the default training and
-            evaluation loaders if not 'None'. Do not use unless you're writing unit
-            tests.
-    """
-    from torch import optim
-    from torch.nn import functional as F
-    from torch.optim import lr_scheduler
-
-    # from pytorch_generative import datasets
-    # from pytorch_generative import models
-    # from pytorch_generative import trainer
-
-    # train_loader, test_loader = debug_loader, debug_loader
-    # if train_loader is None:
-    #     train_loader, test_loader = datasets.get_mnist_loaders(
-    #         batch_size, dynamically_binarize=True
-    #     )
-
-    model = PixelSNAIL(
-        in_channels=1,
-        out_channels=1,
-        n_channels=64,
-        n_pixel_snail_blocks=8,
-        n_residual_blocks=2,
-        attention_value_channels=32,  # n_channels / 2
-        attention_key_channels=4,  # attention_value_channels / 8
-    )
-    # optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    # scheduler = lr_scheduler.MultiplicativeLR(optimizer, lr_lambda=lambda _: 0.999977)
-
-    # def loss_fn(x, _, preds):
+    # def loss(self, x):
+    #     preds = self(x)
     #     batch_size = x.shape[0]
     #     x, preds = x.view((batch_size, -1)), preds.view((batch_size, -1))
     #     loss = F.binary_cross_entropy_with_logits(preds, x, reduction="none")
     #     return loss.sum(dim=1).mean()
-
-    # trainer = trainer.Trainer(
-    #     model=model,
-    #     loss_fn=loss_fn,
-    #     optimizer=optimizer,
-    #     train_loader=train_loader,
-    #     eval_loader=test_loader,
-    #     lr_scheduler=scheduler,
-    #     log_dir=log_dir,
-    #     n_gpus=n_gpus,
-    #     device_id=device_id,
-    # )
-    # trainer.interleaved_train_and_eval(n_epochs)
-if __name__ == '__main__':
-    reproduce()

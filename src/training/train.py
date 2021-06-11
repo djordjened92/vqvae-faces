@@ -86,7 +86,7 @@ def train_epochs(model, train_loader, val_loader, train_args, tb_writer, quiet=F
             return 0.0125
 
     if lr_scheduler == 'cyclic':
-        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/10, max_lr=lr, cycle_momentum=False)
+        scheduler = optim.lr_scheduler.CyclicLR(optimizer, base_lr=lr/2, max_lr=lr, cycle_momentum=False)
     elif lr_scheduler == 'lambda_lr':
         scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda_lr)
     elif lr_scheduler == 'step_lr':

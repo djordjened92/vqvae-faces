@@ -116,8 +116,8 @@ class CausalAttention(nn.Module):
             .to(next(self.parameters()).device)
         )
         attn = (q @ k.transpose(2, 3)) / np.sqrt(k.shape[-1])
-        attn = attn.masked_fill(mask == 0, -np.inf)
-        attn = F.softmax(attn, dim=-1).masked_fill(mask == 0, 0)
+        attn = attn.masked_fill(mask == 0, -1e8)
+        attn = F.softmax(attn, dim=-1)
 
         # Attent to output for each head, stack, and project.
         out = (attn @ v).transpose(2, 3).contiguous().view(n, -1, h, w)

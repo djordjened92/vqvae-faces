@@ -76,7 +76,7 @@ class PixelCNN(nn.Module):
         return out
 
     def loss(self, x):
-        return OrderedDict(loss=F.cross_entropy(self(x), x.squeeze()))
+        return OrderedDict(loss=F.cross_entropy(self(x), x.squeeze(1)))
 
     def sample(self, n):
         samples = torch.zeros(n, *self.input_shape).long().cuda()

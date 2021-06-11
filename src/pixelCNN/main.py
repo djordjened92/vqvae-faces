@@ -12,6 +12,9 @@ from src.training import train_epochs
 from src.pixelCNN.model import PixelCNN, GatedPixelCNN, PixelSNAIL
 from src.vqvae.model import VectorQuantizedVAE
 
+# Try to catch cause of anomalies like nan loss
+torch.autograd.set_detect_anomaly(True)
+
 def main(args):
     # Load pixelcnn configuration
     with open(args.config_path, 'r') as f:
@@ -102,12 +105,12 @@ def main(args):
         pixelCNN = PixelSNAIL(
             in_channels=1,
             out_channels=code_size,
-            n_channels=code_size,
+            n_channels=code_size // 2,
             n_pixel_snail_blocks=n_layers,
             n_residual_blocks=2,
             attention_value_channels=code_size // 2,  # n_channels / 2
             attention_key_channels=16
-        )
+        ).cuda()
     else:
         print(f'Incorrect pixelCNN model type')
         exit(1)
